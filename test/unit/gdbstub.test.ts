@@ -34,6 +34,7 @@ describe('RSP framing', () => {
  */
 function fakeStub(port: number, received: string[]): net.Server {
   return net.createServer((sock) => {
+    sock.on('error', () => undefined); // the pump may drop the connection mid-write
     let buf = '';
     let continues = 0;
     let threadPolls = 0;
@@ -135,5 +136,14 @@ describe('GdbStubPump ownership', () => {
     await new Promise<void>((resolve) => pump.once('continued', () => resolve()));
     pump.stop();
     server.close();
+  });
+});
+
+describe('GdbStubPump error handling', () => {
+  it('does not throw when connecting fails and nobody listens for errors', async () => {
+    const pump = new GdbStubPump({ port: 1, retryMs: 10, connectTimeoutMs: 60 });
+    pump.start();
+    await new Promise((r) => setTimeout(r, 200)); // an unhandled 'error' would fail the test run here
+    pump.stop();
   });
 });

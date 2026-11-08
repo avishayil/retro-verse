@@ -68,7 +68,8 @@ export interface PumpOptions {
  * continues (`c`).
  *
  * Events: 'connected', 'ready' (guest suspended, first thread id), 'continued' (count), 'stop' (reply packet),
- * 'exit' (guest exited), 'closed', 'conflict' (pids holding the port instead of ours), 'error'.
+ * 'exit' (guest exited), 'closed', 'conflict' (pids holding the port instead of ours), 'socketError' (transient,
+ * followed by 'closed'), 'error' (gave up connecting; only emitted when someone listens).
  */
 export class GdbStubPump extends EventEmitter {
   private sock: net.Socket | undefined;
@@ -91,7 +92,7 @@ export class GdbStubPump extends EventEmitter {
     const retry = () => {
       if (this.stopped) return;
       if (Date.now() < deadline) this.retryTimer = setTimeout(attempt, this.opts.retryMs ?? 250);
-      else this.emit('error', new Error(`GDB stub on port ${this.opts.port} did not become available for pid ${this.opts.pid ?? '?'}`));
+      else this.fail(new Error(`GDB stub on port ${this.opts.port} did not become available for pid ${this.opts.pid ?? '?'}`));
     };
     const attempt = async () => {
       if (this.stopped) return;
@@ -115,11 +116,17 @@ export class GdbStubPump extends EventEmitter {
         this.send('qSupported:multiprocess+;swbreak+;hwbreak+;vContSupported+');
       });
       s.on('data', (d) => this.onData(d.toString('latin1')));
-      s.once('error', (e: NodeJS.ErrnoException) => {
-        if (this.sock === s) return void this.emit('error', e);
+      // `on`, not `once`: a socket can error more than once (e.g. ECONNRESET after a failed write), and an
+      // unhandled 'error' would crash the extension host.
+      let connectFailed = false;
+      s.on('error', (e: NodeJS.ErrnoException) => {
+        // Errors on an established connection are followed by 'close', which handles reconnecting.
+        if (this.sock === s) return void this.emit('socketError', e);
+        if (connectFailed) return;
+        connectFailed = true;
         s.destroy();
         if (Date.now() < deadline && !this.stopped) this.retryTimer = setTimeout(attempt, this.opts.retryMs ?? 250);
-        else if (!this.stopped) this.emit('error', new Error(`GDB stub on port ${this.opts.port} did not accept a connection (${e.code ?? e.message})`));
+        else if (!this.stopped) this.fail(new Error(`GDB stub on port ${this.opts.port} did not accept a connection (${e.code ?? e.message})`));
       });
       s.once('close', () => {
         if (this.sock === s) {
@@ -133,6 +140,11 @@ export class GdbStubPump extends EventEmitter {
       });
     };
     void attempt();
+  }
+
+  /** Report a terminal failure. Never throws, even when nobody listens for 'error'. */
+  private fail(e: Error): void {
+    if (this.listenerCount('error') > 0) this.emit('error', e);
   }
 
   private send(data: string): void {
