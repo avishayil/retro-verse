@@ -4,6 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Must not be newer than engines.vscode in package.json (vsce refuses to package otherwise). Raise both
+      # together, by hand, when dropping support for older VS Code versions.
+      - dependency-name: "@types/vscode"
+      # Should match the Node.js version that VS Code's extension host runs, not the newest Node.js.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # mgba-wasm 2.x is multi-threaded and needs SharedArrayBuffer, which VS Code webviews do not provide.
+      - dependency-name: "@thenick775/mgba-wasm"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

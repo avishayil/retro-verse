@@ -17,7 +17,8 @@ export enum WireType {
 
 export const HEADER_BYTES = 9;
 
-export function encodeFrame(type: WireType, tsMicros: number, payload: Uint8Array): Uint8Array {
+// Frames are always freshly allocated (never SharedArrayBuffer-backed), so they can go straight to WebSocket.send.
+export function encodeFrame(type: WireType, tsMicros: number, payload: Uint8Array): Uint8Array<ArrayBuffer> {
   const out = new Uint8Array(HEADER_BYTES + payload.byteLength);
   const dv = new DataView(out.buffer);
   dv.setUint8(0, type);
@@ -39,7 +40,7 @@ export function decodeFrame(buf: ArrayBuffer | Uint8Array): DecodedFrame | undef
   return { type: dv.getUint8(0) as WireType, ts: Number(dv.getBigUint64(1)), payload: bytes.subarray(HEADER_BYTES) };
 }
 
-export function encodeInput(seq: number, buttons: number, axes: { lx: number; ly: number; rx: number; ry: number }): Uint8Array {
+export function encodeInput(seq: number, buttons: number, axes: { lx: number; ly: number; rx: number; ry: number }): Uint8Array<ArrayBuffer> {
   const p = new Uint8Array(24);
   const dv = new DataView(p.buffer);
   dv.setUint32(0, seq >>> 0);
