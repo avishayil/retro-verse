@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>RetroVerse for VS Code</title>
+<meta name="description" content="Play Game Boy Advance, Nintendo DS and Switch games in a section of the VS Code Explorer while you code.">
+<meta property="og:title" content="RetroVerse for VS Code">
+<meta property="og:description" content="Play Game Boy Advance, Nintendo DS and Switch games in a section of the VS Code Explorer while you code.">
+<meta property="og:image" content="https://avishayil.github.io/retro-verse/assets/screenshot.png">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="logo" src="assets/icon.svg" alt="" width="72" height="72">
+    <h1>RetroVerse for VS Code</h1>
+    <p class="lead">Play Game Boy Advance, Nintendo DS and Nintendo Switch games in a section of the VS Code
+      Explorer, right below your files, and keep coding in the editor next to it.</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/avishayil/retro-verse/releases/latest/download/retroverse.vsix">Download retroverse.vsix</a>
+      <a class="button" href="https://github.com/avishayil/retro-verse">Source on GitHub</a>
+    </div>
+    <p class="small">Free and open source (GPL-3.0-or-later). Requires VS Code 1.95 or later. Switch streaming
+      needs macOS on Apple Silicon.</p>
+  </div>
+</header>
+
+<main>
+  <section class="wrap shot">
+    <img src="assets/screenshot.png" alt="VS Code with RetroVerse playing a game in the Explorer below the file tree, and a README open in the editor" width="2282" height="1522">
+  </section>
+
+  <section class="wrap">
+    <h2>What it plays</h2>
+    <div class="cards">
+      <article class="card">
+        <h3>Game Boy Advance</h3>
+        <p><code>.gba</code> files run in mGBA, compiled to WebAssembly, inside VS Code. Battery saves, save
+          states, screenshots and turbo work.</p>
+      </article>
+      <article class="card">
+        <h3>Nintendo DS</h3>
+        <p><code>.nds</code> files run in melonDS, compiled to WebAssembly. Both screens show in the player, and
+          the mouse works as the stylus on the touch screen.</p>
+      </article>
+      <article class="card">
+        <h3>Nintendo Switch</h3>
+        <p><code>.nsp</code>, <code>.xci</code> and <code>.nro</code> files open in Eden, which you install
+          yourself. RetroVerse streams Eden's window into VS Code and sends your input back.</p>
+      </article>
+    </div>
+    <p>RetroVerse does not include or download any games, BIOS files, firmware or keys. Use homebrew or games
+      you own.</p>
+  </section>
+
+  <section class="wrap" id="install">
+    <h2>Install</h2>
+    <ol class="steps">
+      <li>Download <a href="https://github.com/avishayil/retro-verse/releases/latest/download/retroverse.vsix">retroverse.vsix</a>
+        from the <a href="https://github.com/avishayil/retro-verse/releases/latest">latest release</a>.</li>
+      <li>Install it from a terminal:
+        <pre><code>code --install-extension retroverse.vsix</code></pre>
+        or open the Extensions view, click the <code>...</code> menu and choose <em>Install from VSIX...</em></li>
+      <li>Reload VS Code.</li>
+    </ol>
+  </section>
+
+  <section class="wrap split">
+    <div>
+      <h2>Play while you code</h2>
+      <p>Click a game file in the Explorer. Instead of opening an editor tab, the game starts in the RetroVerse
+        section at the bottom of the Explorer. You can also right-click a game file and choose
+        <em>Play in RetroVerse</em>.</p>
+      <p>Drag the divider above the section to give the game more room, or collapse the section to hide it. The
+        game keeps running while it is hidden.</p>
+      <p>Click the game to give it the keyboard and click your code to type again. RetroVerse releases any held
+        buttons when the game loses focus.</p>
+      <p>The section can also live in the secondary side bar or the bottom panel. Drag its header there and VS
+        Code remembers the place.</p>
+    </div>
+    <img class="detail" src="assets/explorer-player.png" alt="The RetroVerse section below the Explorer file tree, with the player toolbar and a game" width="400" height="880">
+  </section>
+
+  <section class="wrap" id="controls">
+    <h2>Controls</h2>
+    <p>All three systems share one keyboard layout, based on desktop GBA emulators such as mGBA and
+      VisualBoyAdvance. A key means the same button on every system.</p>
+    <div class="table">
+      <table>
+        <thead><tr><th>Button</th><th>Key</th><th>GBA</th><th>DS</th><th>Switch</th></tr></thead>
+        <tbody>
+          <tr><td>Movement</td><td>Arrow keys</td><td>D-pad</td><td>D-pad</td><td>Left stick</td></tr>
+          <tr><td>D-pad on Switch</td><td>I, J, K, L</td><td></td><td></td><td>yes</td></tr>
+          <tr><td>A / B</td><td>X / Z</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>L / R</td><td>A / S</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Y / X</td><td>C / V</td><td></td><td>yes</td><td>yes</td></tr>
+          <tr><td>ZL / ZR</td><td>Q / W</td><td></td><td></td><td>yes</td></tr>
+          <tr><td>Start (+)</td><td>Enter</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Select (-)</td><td>Backspace or Right Shift</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Home</td><td>H</td><td></td><td></td><td>yes</td></tr>
+          <tr><td>Turbo</td><td>Hold Tab, or Shift+Tab to toggle</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Quick save / load</td><td>F5 / F8</td><td>yes</td><td>yes</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Standard gamepads work without setup. To change a key, set <code>retroverse.input.keyboard</code>, for
+      example <code>{ "A": "KeyK" }</code>. The <em>Keys</em> button in the player toolbar shows the current
+      layout.</p>
+  </section>
+
+  <section class="wrap" id="switch">
+    <h2>Switch games with Eden</h2>
+    <p>RetroVerse does not include a Switch emulator. Install <a href="https://eden-emu.dev">Eden</a> first.
+      RetroVerse finds <code>eden-cli</code> on your <code>PATH</code> or <code>Eden.app</code> in
+      <code>/Applications</code> or <code>~/Applications</code>, or you can set
+      <code>retroverse.switch.edenPath</code>.</p>
+    <p>When you open a Switch game, RetroVerse starts Eden and a small capture agent. The agent records Eden's
+      window and audio and sends them to VS Code over a local connection that only accepts the current session.
+      Your input goes back to Eden as the key presses Eden is configured for.</p>
+    <p>The first time, macOS asks you to allow VS Code two permissions under Privacy &amp; Security: Screen
+      Recording for the picture and sound, and Accessibility for input. Until you allow them, Eden runs in its
+      own window and RetroVerse shows buttons that open the right settings page.</p>
+    <p>macOS stops drawing a window that is covered, hidden or minimized. RetroVerse moves Eden's window to a
+      display that VS Code is not on, gives focus back to VS Code, and tells you when another window covers
+      Eden. With one display, keep part of Eden's window visible.</p>
+    <p>If Eden's GDB stub is on, RetroVerse connects to it so the game does not wait on "Launching...". On macOS
+      it also applies two MoltenVK settings that prevent a known Vulkan crash. Both can be turned off in the
+      settings.</p>
+  </section>
+
+  <section class="wrap" id="saves">
+    <h2>Saves</h2>
+    <p>GBA and DS saves and save states are stored in VS Code's extension storage, keyed by a hash of the game
+      file, so renaming or moving a game keeps its progress. <em>RetroVerse: Open Saves Folder</em> shows where
+      they are, and <code>retroverse.storage.savesDirectory</code> moves them. Switch saves stay in Eden.</p>
+  </section>
+
+  <section class="wrap" id="help">
+    <h2>Troubleshooting</h2>
+    <dl class="faq">
+      <dt>The RetroVerse section is not in the Explorer.</dt>
+      <dd>Open the <code>...</code> menu at the top of the Explorer and turn on RetroVerse, or right-click its
+        header and choose <em>Reset Location</em>.</dd>
+      <dt>A Switch game stays on "Launching...".</dt>
+      <dd>Look at the RetroVerse output channel. A message about the GDB stub port usually means another copy of
+        Eden is still running.</dd>
+      <dt>The Switch picture freezes.</dt>
+      <dd>Another window probably covers Eden's window. Uncover it and the stream continues.</dd>
+      <dt>Something else is wrong.</dt>
+      <dd>Run <em>RetroVerse: Show Diagnostics</em> and include its output when you
+        <a href="https://github.com/avishayil/retro-verse/issues">open an issue</a>. Never attach game files.</dd>
+    </dl>
+  </section>
+
+  <section class="wrap" id="build">
+    <h2>Build from source</h2>
+    <pre><code>git clone https://github.com/avishayil/retro-verse.git
+cd retro-verse
+npm install
+npm run build          # emulator cores and the extension bundle
+npm run build:native   # macOS only: the eden-bridge capture agent
+npm test</code></pre>
+    <p>Press F5 in VS Code to start a development window. The
+      <a href="https://github.com/avishayil/retro-verse/blob/main/CONTRIBUTING.md">contributing guide</a>
+      explains the tests and project layout.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>RetroVerse is licensed under the GPL-3.0-or-later and includes mGBA (MPL-2.0) and melonDS (GPL-3.0).</p>
+    <p>RetroVerse is not affiliated with or endorsed by Nintendo. Game Boy Advance, Nintendo DS and Nintendo
+      Switch are trademarks of Nintendo. The project does not provide games, BIOS files, firmware or keys.</p>
+  </div>
+</footer>
+
+</body>
+</html>

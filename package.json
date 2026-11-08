@@ -1,0 +1,467 @@
+{
+  "name": "retroverse",
+  "displayName": "RetroVerse",
+  "description": "Play GBA, Nintendo DS and Switch games in a VS Code Explorer section while you code. Uses mGBA and melonDS (WebAssembly) and a locally installed Eden for Switch.",
+  "version": "0.1.0",
+  "publisher": "retroverse",
+  "author": "avishayil",
+  "license": "GPL-3.0-or-later",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e2e",
+    "theme": "dark"
+  },
+  "homepage": "https://avishayil.github.io/retro-verse/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avishayil/retro-verse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/avishayil/retro-verse/issues"
+  },
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "emulator",
+    "gba",
+    "nds",
+    "nintendo ds",
+    "switch",
+    "eden",
+    "mgba",
+    "melonds",
+    "retro",
+    "games"
+  ],
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "GBA and NDS games run in the sandboxed webview. Launching the native Eden emulator (Switch) requires a trusted workspace.",
+      "restrictedConfigurations": [
+        "retroverse.switch.edenPath",
+        "retroverse.switch.bridgePath",
+        "retroverse.switch.extraArgs",
+        "retroverse.switch.environment"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Native Switch emulation needs local files."
+    }
+  },
+  "activationEvents": [],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "retroverse.player",
+        "displayName": "RetroVerse Player",
+        "selector": [
+          {
+            "filenamePattern": "*.gba"
+          },
+          {
+            "filenamePattern": "*.nds"
+          },
+          {
+            "filenamePattern": "*.nsp"
+          },
+          {
+            "filenamePattern": "*.xci"
+          },
+          {
+            "filenamePattern": "*.nro"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "retroverse.play",
+        "title": "Play Game File\u2026",
+        "category": "RetroVerse",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "retroverse.pause",
+        "title": "Pause",
+        "category": "RetroVerse",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "retroverse.resume",
+        "title": "Resume",
+        "category": "RetroVerse",
+        "icon": "$(debug-continue)"
+      },
+      {
+        "command": "retroverse.reset",
+        "title": "Reset",
+        "category": "RetroVerse",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "retroverse.stop",
+        "title": "Stop",
+        "category": "RetroVerse",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "retroverse.quickSave",
+        "title": "Quick Save State",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.quickLoad",
+        "title": "Quick Load State",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.settings",
+        "title": "Open Settings",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.openMods",
+        "title": "Open Mods Folder",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.openSaves",
+        "title": "Open Saves Folder",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.showDiagnostics",
+        "title": "Show Diagnostics",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.dev.streamProcess",
+        "title": "Developer: Stream Any App Window (bridge test)",
+        "category": "RetroVerse"
+      },
+      {
+        "command": "retroverse.closeGame",
+        "title": "Close Game",
+        "category": "RetroVerse",
+        "icon": "$(close)"
+      },
+      {
+        "command": "retroverse.playInEditor",
+        "title": "Play in Editor Tab",
+        "category": "RetroVerse"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "retroverse.pause",
+          "when": "retroverse.sessionStatus == running && retroverse.cap.pause"
+        },
+        {
+          "command": "retroverse.resume",
+          "when": "retroverse.sessionStatus == paused"
+        },
+        {
+          "command": "retroverse.reset",
+          "when": "retroverse.sessionActive"
+        },
+        {
+          "command": "retroverse.stop",
+          "when": "retroverse.sessionActive"
+        },
+        {
+          "command": "retroverse.quickSave",
+          "when": "retroverse.sessionActive && retroverse.cap.saveStates"
+        },
+        {
+          "command": "retroverse.quickLoad",
+          "when": "retroverse.sessionActive && retroverse.cap.saveStates"
+        },
+        {
+          "command": "retroverse.openMods",
+          "when": "retroverse.cap.mods"
+        },
+        {
+          "command": "retroverse.dev.streamProcess",
+          "when": "isMac && retroverse.devMode"
+        },
+        {
+          "command": "retroverse.closeGame",
+          "when": "retroverse.viewHasGame"
+        },
+        {
+          "command": "retroverse.playInEditor",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "retroverse.play",
+          "when": "view == retroverse.playerView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "retroverse.closeGame",
+          "when": "view == retroverse.playerView && retroverse.viewHasGame",
+          "group": "navigation@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "retroverse.play",
+          "when": "resourceExtname =~ /^\\.(gba|nds|nsp|xci|nro)$/i",
+          "group": "navigation@9"
+        },
+        {
+          "command": "retroverse.playInEditor",
+          "when": "resourceExtname =~ /^\\.(gba|nds|nsp|xci|nro)$/i",
+          "group": "navigation@10"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "retroverse.quickSave",
+        "key": "f5",
+        "when": "activeCustomEditorId == retroverse.player && retroverse.cap.saveStates"
+      },
+      {
+        "command": "retroverse.quickLoad",
+        "key": "f8",
+        "when": "activeCustomEditorId == retroverse.player && retroverse.cap.saveStates"
+      }
+    ],
+    "configuration": {
+      "title": "RetroVerse",
+      "properties": {
+        "retroverse.player.location": {
+          "type": "string",
+          "enum": [
+            "sidebar",
+            "editor"
+          ],
+          "default": "sidebar",
+          "enumDescriptions": [
+            "Play in the RetroVerse section of the Explorer, below your files (drag the divider to resize; the section can also be dragged to the secondary side bar or the panel). The editor area stays free for code.",
+            "Play in an editor tab, like a file."
+          ],
+          "markdownDescription": "Where games open when you click a game file or run **RetroVerse: Play Game File\u2026**."
+        },
+        "retroverse.player.retainContextWhenHidden": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the emulator alive when the editor tab is hidden (game pauses). Uses more memory; when off, the game is suspended to a save state and restored when shown."
+        },
+        "retroverse.player.pauseOnBlur": {
+          "type": "boolean",
+          "default": false,
+          "description": "Pause when the player loses keyboard focus (held buttons are always released)."
+        },
+        "retroverse.player.scale": {
+          "type": "string",
+          "enum": [
+            "fit",
+            "integer",
+            "stretch"
+          ],
+          "default": "fit",
+          "description": "How the game image scales within the editor."
+        },
+        "retroverse.player.showStats": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show performance statistics overlay."
+        },
+        "retroverse.player.volume": {
+          "type": "number",
+          "default": 80,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "retroverse.player.turboSpeed": {
+          "type": "number",
+          "enum": [
+            2,
+            3,
+            4,
+            6,
+            8
+          ],
+          "default": 3,
+          "markdownDescription": "Turbo / fast-forward speed for GBA and NDS (\u00d7N). Hold **Tab** for turbo, **Shift+Tab** to toggle it, or use the toolbar button. Switch uses Eden's own *Turbo speed* setting."
+        },
+        "retroverse.input.keyboard": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Keyboard overrides: map logical buttons (`A`, `B`, `X`, `Y`, `L`, `R`, `ZL`, `ZR`, `Start`, `Select`, `Up`, `Down`, `Left`, `Right`, `Home`) to `KeyboardEvent.code` values, e.g. `{ \"A\": \"KeyX\" }`."
+        },
+        "retroverse.nds.screenLayout": {
+          "type": "string",
+          "enum": [
+            "Top/Bottom",
+            "Bottom/Top",
+            "Left/Right",
+            "Right/Left",
+            "Top Only",
+            "Bottom Only",
+            "Hybrid Top",
+            "Hybrid Bottom"
+          ],
+          "default": "Top/Bottom",
+          "description": "Nintendo DS screen layout."
+        },
+        "retroverse.storage.savesDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Custom absolute directory for battery saves and save states. Empty = extension global storage."
+        },
+        "retroverse.switch.edenPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the Eden executable (eden-cli preferred). Empty = auto-detect."
+        },
+        "retroverse.switch.extraArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional arguments passed to Eden (passed as an argument array, never through a shell)."
+        },
+        "retroverse.switch.environment": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "markdownDescription": "Extra environment variables for the Eden process. On macOS RetroVerse already sets `MVK_CONFIG_SYNCHRONOUS_QUEUE_SUBMITS=1` and `MVK_CONFIG_VK_SEMAPHORE_SUPPORT_STYLE=0` (MoltenVK stability workaround for `VK_ERROR_DEVICE_LOST`/`OUT_OF_DEVICE_MEMORY` aborts); set a variable to `null` to remove a default. `DYLD_*`/`LD_*` are refused."
+        },
+        "retroverse.switch.streamMode": {
+          "type": "string",
+          "enum": [
+            "stream",
+            "external"
+          ],
+          "default": "stream",
+          "enumDescriptions": [
+            "Capture the Eden window and stream it into the editor (macOS; needs Screen Recording + Accessibility permissions).",
+            "Run Eden in its own window; the editor shows status and controls."
+          ]
+        },
+        "retroverse.switch.parkWindow": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "While streaming, move the emulator's own window to a display that VS Code is not on (without bringing it to the front). macOS stops drawing windows that are fully covered, hidden or minimized, which would freeze the stream."
+        },
+        "retroverse.switch.bridgePath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the eden-bridge capture agent. Empty = bundled binary."
+        },
+        "retroverse.switch.streamFps": {
+          "type": "number",
+          "enum": [
+            30,
+            60
+          ],
+          "default": 30
+        },
+        "retroverse.switch.streamHeight": {
+          "type": "number",
+          "enum": [
+            540,
+            720,
+            1080
+          ],
+          "default": 720
+        },
+        "retroverse.switch.bitrateKbps": {
+          "type": "number",
+          "default": 8000,
+          "minimum": 1000,
+          "maximum": 40000
+        },
+        "retroverse.switch.keyboardMap": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Overrides for the keys injected into Eden per Switch button (macOS virtual key names such as `C`, `X`, `Return`, `UpArrow`). Must match Eden's keyboard input profile."
+        },
+        "retroverse.switch.isolatedConfig": {
+          "type": "boolean",
+          "default": false,
+          "description": "Experimental: pass a RetroVerse-owned --config file to Eden instead of the user's Eden config."
+        },
+        "retroverse.switch.gdbStub": {
+          "type": "string",
+          "enum": [
+            "pump",
+            "leave"
+          ],
+          "default": "pump",
+          "enumDescriptions": [
+            "If Eden's GDB stub is enabled (Debug settings), RetroVerse connects to it, continues the suspended guest at boot, and keeps continuing on every stop so the game runs.",
+            "Leave the stub to your own debugger; the game stays on 'Launching\u2026' until you connect (e.g. gdb: target remote localhost:6543) and continue."
+          ],
+          "markdownDescription": "How RetroVerse handles Eden's **GDB stub** (`use_gdbstub` in Eden's config). With the stub on, Eden suspends the game at boot until a debugger continues it."
+        },
+        "retroverse.diagnostics.devMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable developer commands (bridge stream test)."
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "retroverse.playerView",
+          "name": "RetroVerse",
+          "icon": "media/retroverse.svg",
+          "contextualTitle": "RetroVerse",
+          "initialSize": 1.4
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vendor": "node scripts/vendor-cores.mjs",
+    "build": "node scripts/vendor-cores.mjs && node esbuild.mjs",
+    "build:native": "node scripts/build-native.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "vitest run",
+    "test:integration": "node esbuild.mjs && node test/integration/runTest.mjs",
+    "fixtures": "node test/fixtures/gen-roms.mjs",
+    "package": "npm run build:native && vsce package --no-dependencies",
+    "vscode:prepublish": "node scripts/vendor-cores.mjs && node esbuild.mjs --production",
+    "dev:roms": "node scripts/import-dev-roms.mjs"
+  },
+  "devDependencies": {
+    "@emulatorjs/core-melonds": "4.2.3",
+    "@thenick775/mgba-wasm": "1.1.1",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "~1.95.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.1.0",
+    "7zip-min": "^3.0.1",
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.65.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.1.0"
+  }
+}
