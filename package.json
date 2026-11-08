@@ -453,7 +453,7 @@
   },
   "devDependencies": {
     "@emulatorjs/core-melonds": "4.2.3",
-    "@thenick775/mgba-wasm": "1.1.1",
+    "@thenick775/mgba-wasm": "2.6.0",
     "@types/node": "^22.0.0",
     "@types/vscode": "~1.95.0",
     "@vscode/test-electron": "^3.1.0",
