@@ -122,10 +122,32 @@ named after the SHA-256 hash of the game file. Renaming or moving a game file ke
 so an interrupted save does not corrupt the previous one. Set `retroverse.storage.savesDirectory` to keep saves
 somewhere else, and use **RetroVerse: Open Saves Folder** to find them. Switch saves stay in Eden.
 
+If a game's save file changes while the game is open, for example because another window or a phone sync wrote
+it, RetroVerse does not overwrite it. The running game's progress goes to a `battery.conflict-<time>.sav` file
+next to it, and RetroVerse asks whether to restart with the newer save or keep the session's save. The version
+that loses is kept in the `backups` folder.
+
+### Sync saves with your phone
+
+RetroVerse can copy GBA and DS battery saves to and from an Android phone over adb. Sync runs only when you ask.
+
+1. Install Android platform-tools (`brew install android-platform-tools`), turn on USB debugging on the phone and
+   connect it.
+2. Right-click a `.gba` or `.nds` file and choose **Sync Save with Android**, or run it from the Command Palette
+   while the game is open.
+3. The first time, pick the app that plays the game on the phone: RetroArch (`.srm`), melonDS (`.sav`) or any
+   other path. RetroVerse lists matching saves it finds, newest first, and remembers your choice.
+
+Sync copies whichever side changed since the last sync. If both changed, it shows both dates and lets you choose.
+**Pull Save from Android** and **Push Save to Android** copy in one direction. Before copying, RetroVerse closes
+the game if it is running, backs up the save it replaces, and stops the phone app so it cannot write its old copy
+back. After a push it reads the file back from the phone to check it. Both emulators keep raw save data, so the
+file is copied unchanged; RetroVerse asks first if the two sizes differ.
+
 ## Commands and settings
 
 The Command Palette has RetroVerse commands to play a game file, pause, resume, reset, stop, quick save, quick
-load, open the saves or mods folder, open the settings and show diagnostics. Search for `retroverse` in the
+load, open the saves or mods folder, sync saves with an Android phone, open the settings and show diagnostics. Search for `retroverse` in the
 Settings editor to see every option.
 
 ## Troubleshooting

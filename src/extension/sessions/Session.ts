@@ -44,6 +44,8 @@ export interface HostSession {
   readonly title: string;
   readonly status: SessionStatus;
   readonly capabilities: Capabilities;
+  /** Canonical path of the game file, once validated (GBA/DS sessions). */
+  readonly gamePath?: string;
   /** Build the init payload for a (re)loaded webview. */
   init(): Promise<InitPayload>;
   /** Called after the init payload was posted; lets sessions re-send state that changed meanwhile. */

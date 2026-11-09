@@ -19,7 +19,11 @@ export class Disposable {
   }
 }
 export const commands = { executeCommand: async () => undefined, registerCommand: () => new Disposable(() => {}) };
-export const window = { showInformationMessage: async () => undefined, showWarningMessage: async () => undefined, showErrorMessage: async () => undefined, createOutputChannel: () => ({ debug() {}, info() {}, warn() {}, error() {}, show() {}, dispose() {} }) };
+/** Test hook: answer for the next warning/information prompts (undefined = dismissed). */
+export const __prompts: { answer?: string; seen: string[] } = { seen: [] };
+export const window = {
+  showInformationMessage: async (m: string) => (__prompts.seen.push(m), __prompts.answer),
+  showWarningMessage: async (m: string) => (__prompts.seen.push(m), __prompts.answer), showErrorMessage: async () => undefined, createOutputChannel: () => ({ debug() {}, info() {}, warn() {}, error() {}, show() {}, dispose() {} }) };
 /** Test hook: per-key settings as VS Code's inspect() would report them. */
 export const __config: Record<string, { globalValue?: unknown; workspaceValue?: unknown; workspaceFolderValue?: unknown; defaultValue?: unknown }> = {};
 export const workspace = {
@@ -31,5 +35,17 @@ export const workspace = {
     inspect: (k: string) => (__config[k] ? { key: k, ...__config[k] } : undefined),
   }),
   isTrusted: true,
+  createFileSystemWatcher: () => {
+    const w = { change: new EventEmitter<unknown>(), create: new EventEmitter<unknown>() };
+    __watchers.push(w);
+    return { onDidChange: w.change.event, onDidCreate: w.create.event, onDidDelete: () => new Disposable(() => {}), dispose() {} };
+  },
 };
+export const __watchers: { change: EventEmitter<unknown>; create: EventEmitter<unknown> }[] = [];
+export class RelativePattern {
+  constructor(
+    readonly base: unknown,
+    readonly pattern: string,
+  ) {}
+}
 export const Uri = { file: (p: string) => ({ fsPath: p, path: p, scheme: 'file' }), parse: (s: string) => ({ fsPath: s, path: s, scheme: s.split(':')[0] }) };

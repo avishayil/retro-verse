@@ -16,6 +16,12 @@ First public release.
 - Turbo: hold Tab, or press Shift+Tab to toggle it. GBA and DS run at 2 to 8 times speed; Switch uses Eden's
   turbo setting.
 - GBA and DS battery saves, quick save and quick load, and screenshots, stored per game by content hash.
+- RetroVerse never overwrites a save that changed on disk while a game was open. The running game's progress
+  goes to a conflict file, and you choose whether to restart with the newer save or keep the session's save.
+  The replaced version is kept in a backups folder.
+- Manual save sync with an Android phone over adb, for RetroArch, melonDS or any save path on the phone. Sync
+  copies whichever side changed since the last sync and asks when both did. It closes the game first, backs up
+  the save it replaces, stops the phone app before writing and verifies the copy.
 - Switch support for Eden's GDB stub, MoltenVK stability settings, and moving Eden's window to a free display so
   macOS keeps drawing it.
 
@@ -32,6 +38,8 @@ First public release.
   WebSocket accepts only VS Code webviews presenting the token, limits unauthenticated connections and input
   rate, and closes connections that send malformed frames.
 - Save folders and files are readable only by you, and log output hides game paths and the home directory.
+- Phone sync accepts only validated, quoted phone paths and package names in the commands it sends to the phone,
+  needs a trusted workspace, and takes the adb location only from user settings.
 - RetroVerse warns when Eden's GDB stub is enabled, because Eden exposes it to the local network.
 - Releases include SHA256SUMS and build provenance attestations. CI pins every GitHub Action by commit SHA,
   installs without lifecycle scripts, checks npm signatures and advisories, verifies pinned hashes of the emulator

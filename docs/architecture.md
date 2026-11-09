@@ -27,6 +27,8 @@ SaveStore (globalStorage/saves/<sha256>/<core>/…)        InputInjector → CGE
 | `src/extension/sessions/` | The `HostSession`/`EmulatorAdapter` contract (doc §3.3), `BaseSession`, and `SessionManager`, which tracks the active session and the `retroverse.cap.*` context keys. |
 | `src/extension/adapters/wasm/` | The host side of in-webview emulation: ROM validation, ROM identity, battery saves, states, screenshots and the ROM change watcher. |
 | `src/extension/adapters/eden/` | `EdenLocator` (discovery, argv building, data dir), `ProcessSupervisor` (no shell, SIGTERM→SIGKILL, SIGSTOP/SIGCONT), `BridgeClient`, `StreamSession` (bridge orchestration, falls back to external mode), `EdenSession`, and `DevStreamSession`. |
+| `src/extension/storage/` | `SaveStore`: per-game folders, atomic writes, fingerprints, guarded battery writes, conflict files and backups. |
+| `src/extension/sync/` | Manual Android save sync: `remote.ts` (phone path and package validation, quoting), `Adb` (discovery and a narrow wrapper over the adb commands RetroVerse uses), `AndroidSync` (location picker, pull, push, three-way sync), `commands.ts` (VS Code commands). |
 | `src/extension/security/` | Path canonicalisation and allowed-root checks, executable validation, tokens and nonces. |
 | `src/player/` | The webview app: toolbar, input, backends, media pipeline. |
 | `native/eden-bridge/` | The Swift capture/encode/serve/inject agent. `EdenBridgeCore` holds the pure logic covered by `swift test`. |
@@ -47,6 +49,20 @@ SaveStore (globalStorage/saves/<sha256>/<core>/…)        InputInjector → CGE
     debounced; melonDS is polled every 5 s and sends only on change. Saves are also flushed on pause, hide, stop
     and dispose.
   * The host serialises all writes, so `quickSave` resolves only after the state is on disk.
+  * Save guard: `init()` records the SHA-256 of the battery save it loaded, and every battery write first checks
+    that the file still has that hash (`SaveStore.writeBatteryGuarded`). If it changed, the write goes to a
+    conflict file and the user chooses between restarting with the new save and keeping the session's save. A
+    watcher on `battery.sav` offers the restart as soon as the file changes, and the suspend state is cleared so
+    it cannot bring old progress back.
+* **Android sync** (manual)
+  1. The game must not be running: sync offers to stop it, which flushes its save.
+  2. `adb devices` picks the phone (`retroverse.android.device`, the only device, or a picker).
+  3. The phone location comes from global state, keyed by ROM hash, or from the picker (`pm list packages`, then a
+     bounded `find` with modification times).
+  4. Both saves are read (the phone's via `adb pull` into a private temp folder) and compared with the hash
+     recorded at the last sync.
+  5. Pull: back up, then `writeBattery`. Push: back up the phone's save, `am force-stop` the app, `adb push` to a
+     temporary name, `mv` and `touch`, read it back and compare; on a mismatch the old phone save is restored.
 * **Hidden tab**
   * Buttons are released, the battery save is flushed, and the game auto-pauses.
   * When `retainContextWhenHidden` is off, a suspend state is also saved and restored on the next `init`.

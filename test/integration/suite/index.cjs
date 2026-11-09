@@ -146,6 +146,17 @@ const tests = {
     await cfg.update('switch.edenPath', undefined, vscode.ConfigurationTarget.Global);
   },
 
+  async 'Android sync: commands are registered and refuse Switch games without prompting'() {
+    await api();
+    const all = await vscode.commands.getCommands(true);
+    for (const id of ['sync', 'pull', 'push', 'setLocation']) assert.ok(all.includes(`retroverse.android.${id}`), `retroverse.android.${id} registered`);
+    // Resolves (with an error notification) instead of opening a picker or calling adb.
+    await Promise.race([
+      vscode.commands.executeCommand('retroverse.android.sync', vscode.Uri.file(path.join(roms, 'stub.nsp'))),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('sync of a Switch game did not return')), 5000)),
+    ]);
+  },
+
   async 'closing the editor stops the session'() {
     const { sessions } = await api();
     await vscode.commands.executeCommand('workbench.action.closeAllEditors');

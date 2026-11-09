@@ -15,6 +15,7 @@ import { SessionManager } from './sessions/SessionManager';
 import type { SessionCommand } from './sessions/Session';
 import { cfg, userSetting } from './settings';
 import { checkSavesDirectory, SaveStore } from './storage/SaveStore';
+import { registerAndroidSync } from './sync/commands';
 
 let manager: SessionManager | undefined;
 
@@ -106,6 +107,7 @@ export function activate(context: vscode.ExtensionContext): RetroVerseApi {
       log.show();
     }),
     vscode.commands.registerCommand('retroverse.dev.streamProcess', () => devStream(context, registry, m, saves(), retain)),
+    ...registerAndroidSync(context, saves, m),
   );
 
   const syncDev = () => void vscode.commands.executeCommand('setContext', 'retroverse.devMode', userSetting('diagnostics.devMode', false));

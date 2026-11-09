@@ -1,10 +1,32 @@
-import { randomBytes } from 'node:crypto';
-import { chmod, mkdir, readFile, rename, writeFile, rm } from 'node:fs/promises';
+import { createHash, randomBytes } from 'node:crypto';
+import { chmod, mkdir, readdir, readFile, rename, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 const SAFE_ID = /^[a-z0-9:_-]{1,80}$/i;
 
 export type StateSlot = number | 'suspend';
+
+/** Identifies the contents of a battery save. `undefined` means the file does not exist. */
+export interface SaveFingerprint {
+  sha256: string;
+  size: number;
+}
+
+export type GuardedWrite = { written: true; fp: SaveFingerprint } | { written: false; conflictPath: string; fp: SaveFingerprint | undefined };
+
+const MAX_BACKUPS = 20;
+
+export function fingerprintOf(data: Uint8Array): SaveFingerprint {
+  return { sha256: createHash('sha256').update(data).digest('hex'), size: data.byteLength };
+}
+
+export function sameFingerprint(a: SaveFingerprint | undefined, b: SaveFingerprint | undefined): boolean {
+  return a === b || (!!a && !!b && a.sha256 === b.sha256 && a.size === b.size);
+}
+
+function stamp(): string {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
 
 /**
  * Per-game, per-core persistence. Layout:
@@ -27,6 +49,49 @@ export class SaveStore {
 
   async writeBattery(romId: string, coreId: string, data: Uint8Array): Promise<void> {
     await atomicWrite(path.join(this.dirFor(romId, coreId), 'battery.sav'), data);
+  }
+
+  batteryPath(romId: string, coreId: string): string {
+    return path.join(this.dirFor(romId, coreId), 'battery.sav');
+  }
+
+  async batteryFingerprint(romId: string, coreId: string): Promise<SaveFingerprint | undefined> {
+    const data = await this.readBattery(romId, coreId);
+    return data ? fingerprintOf(data) : undefined;
+  }
+
+  /**
+   * Write the battery save only if the file on disk is still the one this session expects. If something else
+   * changed it (another window, a phone sync, a manual copy), the data goes to a conflict file next to it and
+   * battery.sav is left alone. The check and the rename are a few milliseconds apart; that window is accepted.
+   * Pass `conflictPath` to keep updating the same conflict file on later writes.
+   */
+  async writeBatteryGuarded(romId: string, coreId: string, data: Uint8Array, expected: SaveFingerprint | undefined, conflictPath?: string): Promise<GuardedWrite> {
+    const current = await this.batteryFingerprint(romId, coreId);
+    if (!conflictPath && sameFingerprint(current, expected)) {
+      await this.writeBattery(romId, coreId, data);
+      return { written: true, fp: fingerprintOf(data) };
+    }
+    const target = conflictPath ?? path.join(this.dirFor(romId, coreId), `battery.conflict-${stamp()}.sav`);
+    await atomicWrite(target, data);
+    return { written: false, conflictPath: target, fp: current };
+  }
+
+  /** Copy the current battery save into backups/ (newest 20 kept). Returns the backup path, if there was a save. */
+  async backupBattery(romId: string, coreId: string, label: string): Promise<string | undefined> {
+    const data = await this.readBattery(romId, coreId);
+    return data ? this.writeBackup(romId, coreId, label, data) : undefined;
+  }
+
+  /** Store `data` in backups/ as <timestamp>-<label>.sav and prune to the newest 20. */
+  async writeBackup(romId: string, coreId: string, label: string, data: Uint8Array): Promise<string> {
+    if (!/^[a-z0-9-]{1,32}$/.test(label)) throw new Error('Invalid backup label.');
+    const dir = path.join(this.dirFor(romId, coreId), 'backups');
+    const p = path.join(dir, `${stamp()}-${label}.sav`);
+    await atomicWrite(p, data);
+    const old = (await readdir(dir)).filter((f) => f.endsWith('.sav')).sort().slice(0, -MAX_BACKUPS);
+    await Promise.all(old.map((f) => rm(path.join(dir, f), { force: true })));
+    return p;
   }
 
   async readState(romId: string, coreId: string, slot: StateSlot): Promise<Uint8Array | undefined> {

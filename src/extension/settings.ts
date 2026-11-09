@@ -22,6 +22,8 @@ export const USER_ONLY_SETTINGS = [
   'switch.isolatedConfig',
   'storage.savesDirectory',
   'diagnostics.devMode',
+  'android.adbPath',
+  'android.device',
 ] as const;
 export type UserOnlySetting = (typeof USER_ONLY_SETTINGS)[number];
 
