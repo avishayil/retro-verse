@@ -1,0 +1,34 @@
+node_modules/
+dist/
+media/cores/
+bin/
+native/eden-bridge/.build/
+*.vsix
+.vscode-test/
+test/fixtures/roms/
+test/harness/out-*.png
+dev-roms/
+.DS_Store
+native/eden-bridge/.swiftpm/
+
+# Personal notes and local tool settings are not part of the project
+plans/
+.claude/
+CLAUDE.md
+
+# Never commit games, saves, firmware or keys (any location)
+*.gba
+*.nds
+*.nsp
+*.xci
+*.nro
+*.nca
+*.sav
+*.srm
+*.ss[0-9]
+*.state
+*.ml[0-9]
+*.rtc
+*.keys
+prod.keys
+title.keys

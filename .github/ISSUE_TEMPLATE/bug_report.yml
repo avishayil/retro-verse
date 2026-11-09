@@ -1,0 +1,34 @@
+name: Bug report
+description: Something does not work as described
+body:
+  - type: markdown
+    attributes:
+      value: Please do not attach or link game files, BIOS files, firmware or keys.
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options: [Game Boy Advance, Nintendo DS, Nintendo Switch (Eden), Not specific to one system]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: RetroVerse, VS Code and operating system versions (and Eden, for Switch).
+      placeholder: RetroVerse 0.1.0, VS Code 1.95, macOS 15.1, Eden nightly
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: 'Run "RetroVerse: Show Diagnostics" and paste the RetroVerse output channel here.'
+      render: text

@@ -1,0 +1,7 @@
+# SHA-256 of the emulator core files vendored into media/cores/ by scripts/vendor-cores.mjs.
+# @thenick775/mgba-wasm@1.1.1 and @emulatorjs/core-melonds@4.2.3. Update these together with the package versions.
+18a379a8a316c58fff601253673862d3c9015adb5adc318e2b395c7cc7ec6c0c  mgba/mgba.js
+bed02835f672a48b8be59f4e4cd65594109f2b54f30100539c6fd12c022d4bf9  mgba/mgba.wasm
+07fb6dc287a24b05006980a4f6427fb07b60ac658e3d51935c3ec2f9062c5190  melonds/melonds_libretro.js
+944049ac4beb60dd304c1596dfa56ba0fd8fb7aa817031ec291e47fc5c3a0856  melonds/melonds_libretro.wasm
+8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903  melonds/license.txt

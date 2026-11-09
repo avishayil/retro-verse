@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; font-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0f1e">
+<title>RetroVerse: play GBA, DS and Switch games in VS Code</title>
+<meta name="description" content="RetroVerse is a free VS Code extension that plays Game Boy Advance, Nintendo DS and Switch games in a section of the Explorer, right next to your code.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RetroVerse for VS Code">
+<meta property="og:description" content="Play Game Boy Advance, Nintendo DS and Switch games in the VS Code Explorer while you code.">
+<meta property="og:image" content="https://avishayil.github.io/retro-verse/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="#top" aria-label="RetroVerse home"><img src="assets/icon.svg" alt="" width="28" height="28"><img class="wordmark" src="assets/wordmark.svg" alt="RetroVerse" width="204" height="32"></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#controls">Controls</a>
+      <a href="#switch">Switch</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-ghost nav-cta" href="https://github.com/avishayil/retro-verse" rel="noopener noreferrer">GitHub</a>
+    <details class="menu">
+      <summary>Menu</summary>
+      <nav aria-label="Sections">
+        <a href="#features">Features</a>
+        <a href="#install">Install</a>
+        <a href="#controls">Controls</a>
+        <a href="#switch">Switch</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/avishayil/retro-verse" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">VS Code extension · free and open source</p>
+        <h1>Play retro games in VS Code, right next to your code.</h1>
+        <p class="lead">RetroVerse runs Game Boy Advance, Nintendo DS and Nintendo Switch games in a section of the
+          Explorer, below your files. Code in the editor, play in the sidebar.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://github.com/avishayil/retro-verse/releases/latest/download/retroverse.vsix" rel="noopener noreferrer"><img src="assets/icons/download.svg" alt="" width="20" height="20">Download for VS Code</a>
+          <a class="btn btn-ghost" href="https://github.com/avishayil/retro-verse" rel="noopener noreferrer">View on GitHub</a>
+        </div>
+        <ul class="meta" aria-label="Requirements">
+          <li>GPL-3.0-or-later</li>
+          <li>VS Code 1.95+</li>
+          <li>Switch needs macOS on Apple Silicon</li>
+        </ul>
+      </div>
+      <figure class="hero-shot frame">
+        <picture>
+          <source srcset="assets/screenshot.webp" type="image/webp">
+          <img src="assets/screenshot.png" alt="VS Code with a game running in the RetroVerse section below the Explorer file tree, and a README open in the editor" width="2282" height="1522" fetchpriority="high">
+        </picture>
+      </figure>
+    </div>
+  </section>
+
+  <section class="steps-strip" aria-labelledby="how">
+    <div class="wrap">
+      <h2 id="how" class="visually-hidden">How it works</h2>
+      <ol class="steps">
+        <li><span class="num" aria-hidden="true">1</span><div><strong>Install the extension</strong><span>Download the VSIX and install it in VS Code.</span></div></li>
+        <li><span class="num" aria-hidden="true">2</span><div><strong>Click a game file</strong><span>Open a <code>.gba</code>, <code>.nds</code> or Switch file from the Explorer.</span></div></li>
+        <li><span class="num" aria-hidden="true">3</span><div><strong>Play while you code</strong><span>Click the game to play, click your code to type.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <div class="wrap">
+      <p class="eyebrow">Features</p>
+      <h2>Built to sit beside your work</h2>
+
+      <div class="feature">
+        <div class="feature-media">
+          <picture>
+            <source srcset="assets/explorer-player.webp" type="image/webp">
+            <img class="frame tall" src="assets/explorer-player.png" alt="The RetroVerse section below the Explorer file tree, with the player toolbar and a game" width="400" height="880" loading="lazy">
+          </picture>
+        </div>
+        <div class="feature-copy">
+          <img class="feature-icon" src="assets/icons/explorer.svg" alt="" width="40" height="40">
+          <h3>Plays in the Explorer</h3>
+          <p>Click a game file and it starts in a RetroVerse section at the bottom of the Explorer instead of an editor
+            tab. Drag the divider to give the game more room, or collapse the section and the game keeps running.</p>
+          <p>You can move the section to the secondary side bar or the bottom panel, and VS Code remembers where you
+            put it.</p>
+        </div>
+      </div>
+
+      <div class="feature reverse">
+        <div class="feature-media">
+          <div class="keys-art frame" role="img" aria-label="Keyboard layout: arrow keys move, X is A, Z is B, A and S are L and R, Enter is Start, Backspace is Select, Tab is turbo">
+            <div class="keys-row"><kbd class="k-wide">Tab</kbd><kbd>Q</kbd><kbd>W</kbd><span class="k-gap"></span><kbd class="k-wide">⌫</kbd></div>
+            <div class="keys-row"><kbd>A</kbd><kbd>S</kbd><span class="k-gap"></span><kbd class="k-wide k-accent">Enter</kbd></div>
+            <div class="keys-row"><kbd class="k-accent">Z</kbd><kbd class="k-accent">X</kbd><kbd>C</kbd><kbd>V</kbd><span class="k-gap"></span><span class="arrows"><kbd>↑</kbd></span></div>
+            <div class="keys-row"><span class="k-gap wide"></span><span class="arrows"><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></span></div>
+          </div>
+        </div>
+        <div class="feature-copy">
+          <img class="feature-icon" src="assets/icons/keyboard.svg" alt="" width="40" height="40">
+          <h3>One keyboard layout for every console</h3>
+          <p>The keys follow desktop GBA emulators such as mGBA and VisualBoyAdvance, and a key means the same button
+            on every system. Arrow keys move, X and Z are A and B, Enter is Start and Backspace is Select.</p>
+          <p>Hold Tab for turbo. Standard gamepads work without setup.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-media">
+          <div class="flow frame" role="img" aria-label="Eden's window is captured by the eden-bridge agent and streamed into the VS Code Explorer; input goes back the same way">
+            <div class="flow-node"><img src="assets/icons/controller.svg" alt="" width="40" height="40"><span>Eden window</span></div>
+            <div class="flow-arrow" aria-hidden="true"><span>video + audio</span></div>
+            <div class="flow-node"><img src="assets/icons/shield.svg" alt="" width="40" height="40"><span>eden-bridge</span></div>
+            <div class="flow-arrow" aria-hidden="true"><span>local stream</span></div>
+            <div class="flow-node"><img src="assets/icons/explorer.svg" alt="" width="40" height="40"><span>Explorer</span></div>
+          </div>
+        </div>
+        <div class="feature-copy">
+          <img class="feature-icon" src="assets/icons/controller.svg" alt="" width="40" height="40">
+          <h3>Switch games through Eden</h3>
+          <p>For Switch, RetroVerse starts Eden, which you install yourself, and streams its window into VS Code. A
+            small capture agent sends the picture and sound over a local connection that only the current session
+            can use, and your input goes back to Eden.</p>
+          <p>RetroVerse reads Eden's own key bindings, so changes you make in Eden carry over.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" aria-labelledby="systems">
+    <div class="wrap">
+      <p class="eyebrow">Systems</p>
+      <h2 id="systems">What it plays</h2>
+      <div class="cards">
+        <article class="card">
+          <img src="assets/icons/cartridge.svg" alt="" width="40" height="40">
+          <h3>Game Boy Advance</h3>
+          <p class="chips"><code>.gba</code></p>
+          <p>mGBA, compiled to WebAssembly, running inside VS Code. Battery saves, save states, screenshots and turbo.</p>
+        </article>
+        <article class="card">
+          <img src="assets/icons/dualscreen.svg" alt="" width="40" height="40">
+          <h3>Nintendo DS</h3>
+          <p class="chips"><code>.nds</code></p>
+          <p>melonDS, compiled to WebAssembly. Both screens in the player, with the mouse as the stylus.</p>
+        </article>
+        <article class="card">
+          <img src="assets/icons/controller.svg" alt="" width="40" height="40">
+          <h3>Nintendo Switch</h3>
+          <p class="chips"><code>.nsp</code> <code>.xci</code> <code>.nro</code></p>
+          <p>A separately installed Eden, streamed into VS Code on macOS with Apple Silicon.</p>
+        </article>
+      </div>
+      <p class="note">RetroVerse does not include or download any games, BIOS files, firmware or keys. Use homebrew or games you own.</p>
+    </div>
+  </section>
+
+  <section id="install" class="section">
+    <div class="wrap narrow">
+      <p class="eyebrow">Install</p>
+      <h2>Install in three steps</h2>
+      <ol class="install">
+        <li>
+          <h3>Download the extension</h3>
+          <p>Get <a href="https://github.com/avishayil/retro-verse/releases/latest/download/retroverse.vsix" rel="noopener noreferrer">retroverse.vsix</a> from the <a href="https://github.com/avishayil/retro-verse/releases/latest" rel="noopener noreferrer">latest release</a>.</p>
+        </li>
+        <li>
+          <h3>Install it</h3>
+          <p>From a terminal:</p>
+          <pre class="code"><code>code --install-extension retroverse.vsix</code></pre>
+          <p>Or open the Extensions view, click the <code>...</code> menu and choose <em>Install from VSIX...</em></p>
+        </li>
+        <li>
+          <h3>Reload VS Code and open a game</h3>
+          <p>Click a game file in the Explorer, or right-click it and choose <em>Play in RetroVerse</em>.</p>
+        </li>
+      </ol>
+      <details class="verify">
+        <summary>Verify the download</summary>
+        <p>Every release is built by GitHub Actions and comes with build provenance and a <code>SHA256SUMS</code> file.
+          With the GitHub CLI:</p>
+        <pre class="code"><code>gh attestation verify retroverse.vsix --repo avishayil/retro-verse</code></pre>
+      </details>
+    </div>
+  </section>
+
+  <section id="controls" class="section alt">
+    <div class="wrap narrow">
+      <p class="eyebrow">Controls</p>
+      <h2>Keyboard and gamepad</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th scope="col">Button</th><th scope="col">Key</th><th scope="col">GBA</th><th scope="col">DS</th><th scope="col">Switch</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Movement</th><td><kbd class="arrow">←</kbd> <kbd class="arrow">↑</kbd> <kbd class="arrow">↓</kbd> <kbd class="arrow">→</kbd></td><td>D-pad</td><td>D-pad</td><td>Left stick</td></tr>
+            <tr><th scope="row">D-pad on Switch</th><td><kbd>I</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd></td><td></td><td></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">A / B</th><td><kbd>X</kbd> / <kbd>Z</kbd></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">L / R</th><td><kbd>A</kbd> / <kbd>S</kbd></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Y / X</th><td><kbd>C</kbd> / <kbd>V</kbd></td><td></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">ZL / ZR</th><td><kbd>Q</kbd> / <kbd>W</kbd></td><td></td><td></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Start (+)</th><td><kbd>Enter</kbd></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Select (-)</th><td><kbd>Backspace</kbd> or <kbd>Right Shift</kbd></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Home</th><td><kbd>H</kbd></td><td></td><td></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Turbo</th><td>Hold <kbd>Tab</kbd>, or <kbd>Shift</kbd> + <kbd>Tab</kbd> to toggle</td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td></tr>
+            <tr><th scope="row">Quick save / load</th><td><kbd>F5</kbd> / <kbd>F8</kbd></td><td><span class="yes">yes</span></td><td><span class="yes">yes</span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>To change a key, set <code>retroverse.input.keyboard</code>, for example <code>{ "A": "KeyK" }</code>. The
+        <em>Keys</em> button in the player toolbar shows the current layout.</p>
+    </div>
+  </section>
+
+  <section id="switch" class="section">
+    <div class="wrap narrow">
+      <p class="eyebrow">Switch</p>
+      <h2>Switch games with Eden</h2>
+      <p>RetroVerse does not include a Switch emulator. Install <a href="https://eden-emu.dev" rel="noopener noreferrer">Eden</a> first; RetroVerse finds
+        <code>eden-cli</code> on your <code>PATH</code> or <code>Eden.app</code> in <code>/Applications</code> or
+        <code>~/Applications</code>, or you can set <code>retroverse.switch.edenPath</code>.</p>
+      <ul class="checklist">
+        <li>macOS on Apple Silicon, and a trusted workspace.</li>
+        <li>Allow VS Code <strong>Screen Recording</strong> (picture and sound) and <strong>Accessibility</strong>
+          (input) under Privacy &amp; Security. Until you do, Eden runs in its own window and RetroVerse shows buttons
+          that open the right settings page.</li>
+        <li>Keep Eden's window uncovered. macOS stops drawing covered, hidden or minimized windows, so RetroVerse
+          moves Eden to a display VS Code is not on and tells you when something covers it.</li>
+        <li>If Eden's GDB stub is on, RetroVerse lets the game start instead of waiting on "Launching...", and warns
+          you that the stub is reachable from your network.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="faq" class="section alt">
+    <div class="wrap narrow">
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions and troubleshooting</h2>
+      <div class="faq">
+        <details>
+          <summary>Where are my saves?</summary>
+          <p>GBA and DS saves and save states live in VS Code's extension storage, keyed by a hash of the game file, so
+            renaming or moving a game keeps its progress. <em>RetroVerse: Open Saves Folder</em> shows where they are,
+            and <code>retroverse.storage.savesDirectory</code> moves them. Switch saves stay in Eden.</p>
+        </details>
+        <details>
+          <summary>The RetroVerse section is not in the Explorer.</summary>
+          <p>Open the <code>...</code> menu at the top of the Explorer and turn on RetroVerse, or right-click its header
+            and choose <em>Reset Location</em>.</p>
+        </details>
+        <details>
+          <summary>A Switch game stays on "Launching...".</summary>
+          <p>Check the RetroVerse output channel. A message about the GDB stub port usually means another copy of Eden
+            is still running.</p>
+        </details>
+        <details>
+          <summary>The Switch picture freezes.</summary>
+          <p>Another window probably covers Eden's window. Uncover it and the stream continues.</p>
+        </details>
+        <details>
+          <summary>Is it safe to run?</summary>
+          <p>Games run in VS Code's sandboxed webview, which can load only the extension's own files. Settings that pick
+            programs or folders are ignored in workspace settings, and the Switch capture agent accepts only the
+            current session. The <a href="https://github.com/avishayil/retro-verse/blob/main/docs/security.md" rel="noopener noreferrer">security model</a>
+            describes every control.</p>
+        </details>
+        <details>
+          <summary>Something else is wrong.</summary>
+          <p>Run <em>RetroVerse: Show Diagnostics</em> and include its output when you
+            <a href="https://github.com/avishayil/retro-verse/issues" rel="noopener noreferrer">open an issue</a>. Never attach game files.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap cta-inner frame">
+      <img src="assets/icons/dpad.svg" alt="" width="48" height="48">
+      <div>
+        <h2>Press start.</h2>
+        <p>Free and open source. Bring homebrew or games you own.</p>
+      </div>
+      <a class="btn btn-primary" href="https://github.com/avishayil/retro-verse/releases/latest/download/retroverse.vsix" rel="noopener noreferrer"><img src="assets/icons/download.svg" alt="" width="20" height="20">Download for VS Code</a>
+    </div>
+  </section>
+
+  <section id="build" class="section">
+    <div class="wrap narrow">
+      <h2>Build from source</h2>
+      <pre class="code"><code>git clone https://github.com/avishayil/retro-verse.git
+cd retro-verse
+npm install
+npm run build          # emulator cores and the extension bundle
+npm run build:native   # macOS only: the eden-bridge capture agent
+npm test</code></pre>
+      <p>Press F5 in VS Code to start a development window. The
+        <a href="https://github.com/avishayil/retro-verse/blob/main/CONTRIBUTING.md" rel="noopener noreferrer">contributing guide</a> explains the tests and the
+        project layout.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <img class="wordmark" src="assets/wordmark.svg" alt="RetroVerse" width="153" height="24">
+      <p>Licensed under the GPL-3.0-or-later. Includes mGBA (MPL-2.0) and melonDS (GPL-3.0).</p>
+    </div>
+    <nav aria-label="Project links">
+      <a href="https://github.com/avishayil/retro-verse" rel="noopener noreferrer">GitHub</a>
+      <a href="https://github.com/avishayil/retro-verse/releases" rel="noopener noreferrer">Releases</a>
+      <a href="https://github.com/avishayil/retro-verse/issues" rel="noopener noreferrer">Issues</a>
+      <a href="https://github.com/avishayil/retro-verse/blob/main/SECURITY.md" rel="noopener noreferrer">Security</a>
+      <a href="https://github.com/avishayil/retro-verse/blob/main/LICENSE" rel="noopener noreferrer">License</a>
+    </nav>
+    <p class="legal">RetroVerse is not affiliated with or endorsed by Nintendo. Game Boy Advance, Nintendo DS and
+      Nintendo Switch are trademarks of Nintendo. The project does not provide games, BIOS files, firmware or keys.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "@emulatorjs/emulatorjs",
+  "version": "0.0.0-retroverse-stub",
+  "description": "Empty stand-in. @emulatorjs/core-melonds declares @emulatorjs/emulatorjs@latest, but RetroVerse only uses the core archive from that package, so the floating dependency (and its ~50 transitive packages) is replaced by this stub via package.json overrides.",
+  "license": "GPL-3.0-or-later",
+  "private": true
+}

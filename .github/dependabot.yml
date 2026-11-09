@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Minor and patch updates arrive as one pull request; major updates stay separate for review.
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Must not be newer than engines.vscode in package.json (vsce refuses to package otherwise). Raise both
+      # together, by hand, when dropping support for older VS Code versions.
+      - dependency-name: "@types/vscode"
+      # Should match the Node.js version that VS Code's extension host runs, not the newest Node.js.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # mgba-wasm 2.x is multi-threaded and needs SharedArrayBuffer, which VS Code webviews do not provide.
+      # Core updates also need new pins in scripts/cores.sha256.
+      - dependency-name: "@thenick775/mgba-wasm"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # Actions are pinned by commit SHA; Dependabot updates the SHA and the version comment together.
+      github-actions:
+        patterns: ["*"]

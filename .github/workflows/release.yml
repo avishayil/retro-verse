@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: write      # create the release
+      id-token: write      # sign build provenance
+      attestations: write  # store build provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Check that the tag matches package.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION" >&2
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+      - run: npm ci --ignore-scripts
+      - run: npm audit signatures
+      - run: npm audit --audit-level=high
+      - run: npm run typecheck
+      - run: npm test
+      - run: swift test --package-path native/eden-bridge
+      - run: npm run build:native
+      - run: node test/harness/bridge-security.mjs
+      - name: Package
+        run: |
+          npx vsce package --no-dependencies -o retroverse.vsix
+          cp retroverse.vsix "retroverse-$VERSION.vsix"
+          shasum -a 256 retroverse.vsix "retroverse-$VERSION.vsix" > SHA256SUMS
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            retroverse.vsix
+            retroverse-${{ env.VERSION }}.vsix
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v v="$VERSION" '$0 == "## " v {found=1; next} /^## / && found {exit} found' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "No CHANGELOG.md section for $VERSION" >&2; exit 1; }
+          {
+            echo
+            echo "## Verify this release"
+            echo
+            echo "Check the build provenance with the GitHub CLI:"
+            echo
+            echo '```sh'
+            echo "gh attestation verify retroverse.vsix --repo $GITHUB_REPOSITORY"
+            echo '```'
+            echo
+            echo "Or compare the SHA-256 against \`SHA256SUMS\`."
+          } >> notes.md
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" retroverse.vsix "retroverse-$VERSION.vsix" SHA256SUMS --title "RetroVerse $VERSION" --notes-file notes.md --verify-tag
