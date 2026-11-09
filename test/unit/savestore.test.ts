@@ -2,10 +2,10 @@ import { mkdtemp, readdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { checkSavesDirectory, SaveStore } from '../../src/extension/storage/SaveStore';
+import { checkSavesDirectory, fingerprintOf, sameFingerprint, SaveStore } from '../../src/extension/storage/SaveStore';
 import { realpathSync, statSync, symlinkSync, mkdirSync } from 'node:fs';
 import { romIdentity } from '../../src/extension/storage/RomIdentity';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 describe('SaveStore', () => {
   it('isolates saves per ROM and core, and round-trips data', async () => {
@@ -72,5 +72,60 @@ describe('save file permissions and saves folder checks', () => {
     const link = path.join(realpathSync(os.tmpdir()), `rv-link-${process.pid}`);
     symlinkSync(ws, link);
     expect(checkSavesDirectory(link, [], realpathSync)).toMatchObject({ ok: false, reason: expect.stringMatching(/symlink/) });
+  });
+});
+
+describe('battery save guard', () => {
+  const bytes = (...b: number[]) => new Uint8Array(b);
+
+  it('fingerprints saves, including a missing one', async () => {
+    const s = new SaveStore(await mkdtemp(path.join(os.tmpdir(), 'rv-fp-')));
+    expect(await s.batteryFingerprint('abc', 'mgba')).toBeUndefined();
+    await s.writeBattery('abc', 'mgba', bytes(1, 2));
+    expect(await s.batteryFingerprint('abc', 'mgba')).toEqual(fingerprintOf(bytes(1, 2)));
+    expect(sameFingerprint(undefined, undefined)).toBe(true);
+    expect(sameFingerprint(fingerprintOf(bytes(1)), fingerprintOf(bytes(2)))).toBe(false);
+  });
+
+  it('writes through when the file is what the session expects', async () => {
+    const s = new SaveStore(await mkdtemp(path.join(os.tmpdir(), 'rv-guard-')));
+    expect(await s.writeBatteryGuarded('abc', 'mgba', bytes(1), undefined)).toMatchObject({ written: true });
+    const r = await s.writeBatteryGuarded('abc', 'mgba', bytes(2), fingerprintOf(bytes(1)));
+    expect(r).toEqual({ written: true, fp: fingerprintOf(bytes(2)) });
+    expect([...(await s.readBattery('abc', 'mgba'))!]).toEqual([2]);
+  });
+
+  it('keeps an externally changed save and writes a conflict file instead', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'rv-conflict-'));
+    const s = new SaveStore(root);
+    await s.writeBattery('abc', 'mgba', bytes(1));
+    const loaded = fingerprintOf(bytes(1));
+    await s.writeBattery('abc', 'mgba', bytes(7)); // e.g. a save pulled from a phone
+    const r = await s.writeBatteryGuarded('abc', 'mgba', bytes(2), loaded);
+    expect(r.written).toBe(false);
+    if (r.written) return;
+    expect([...(await s.readBattery('abc', 'mgba'))!]).toEqual([7]);
+    expect(path.basename(r.conflictPath)).toMatch(/^battery\.conflict-.*\.sav$/);
+    // later writes keep going to the same conflict file
+    await s.writeBatteryGuarded('abc', 'mgba', bytes(3), loaded, r.conflictPath);
+    const files = (await readdir(path.join(root, 'abc', 'mgba'))).filter((f) => f.includes('conflict'));
+    expect(files).toEqual([path.basename(r.conflictPath)]);
+    expect([...(await readFile(r.conflictPath))]).toEqual([3]);
+    expect([...(await s.readBattery('abc', 'mgba'))!]).toEqual([7]);
+  });
+
+  it('keeps at most 20 backups', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'rv-bak-'));
+    const s = new SaveStore(root);
+    expect(await s.backupBattery('abc', 'mgba', 'x')).toBeUndefined();
+    await s.writeBattery('abc', 'mgba', bytes(1));
+    for (let i = 0; i < 23; i++) {
+      await s.backupBattery('abc', 'mgba', `n${String(i).padStart(2, '0')}`);
+      await new Promise((r) => setTimeout(r, 2));
+    }
+    const left = await readdir(path.join(root, 'abc', 'mgba', 'backups'));
+    expect(left).toHaveLength(20);
+    expect(left.some((f) => f.endsWith('-n00.sav'))).toBe(false);
+    await expect(s.backupBattery('abc', 'mgba', '../x')).rejects.toThrow();
   });
 });

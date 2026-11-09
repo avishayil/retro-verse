@@ -1,4 +1,4 @@
-import { realpath, stat } from 'node:fs/promises';
+import { access, constants, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import type { Platform } from '../../protocol/types';
 
@@ -62,6 +62,16 @@ export async function validateExecutable(p: string): Promise<string> {
   const dir = await stat(path.dirname(real));
   if ((dir.mode & 0o002) !== 0 && (dir.mode & 0o1000) === 0) throw new PathValidationError(`Refusing to run ${p}: its folder is writable by everyone.`);
   return real;
+}
+
+/** A candidate is usable if it exists, is executable and passes the ownership/permission checks. */
+export async function usableExecutable(p: string): Promise<string | undefined> {
+  try {
+    await access(p, constants.X_OK);
+    return await validateExecutable(p);
+  } catch {
+    return undefined;
+  }
 }
 
 /**

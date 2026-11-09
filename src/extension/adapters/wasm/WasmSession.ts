@@ -9,6 +9,7 @@ import { BaseSession } from '../../sessions/BaseSession';
 import type { CommandResult, LaunchContext, SessionCommand } from '../../sessions/Session';
 import { playerSettings } from '../../settings';
 import { romIdentity } from '../../storage/RomIdentity';
+import { fingerprintOf, sameFingerprint, type SaveFingerprint } from '../../storage/SaveStore';
 
 export const WASM_CAPABILITIES: Capabilities = {
   saveStates: true,
@@ -42,6 +43,13 @@ export class WasmSession extends BaseSession {
   private streaming = false;
   private watcher: vscode.FileSystemWatcher | undefined;
   private restartPrompted = false;
+  private saveWatcher: vscode.FileSystemWatcher | undefined;
+  /** What battery.sav held when the game loaded it, updated after each of our own writes. */
+  private batteryFp: SaveFingerprint | undefined;
+  /** Set once battery.sav changed under this session: further flushes go to this file instead. */
+  private conflictPath: string | undefined;
+  private lastSessionSave: Uint8Array | undefined;
+  private savePrompted = false;
   /** Serialises persistence so a command that follows a save always observes the written file. */
   private persist: Promise<void> = Promise.resolve();
 
@@ -50,6 +58,10 @@ export class WasmSession extends BaseSession {
     private readonly spec: WasmCoreSpec,
   ) {
     super(spec.platform, ctx, WASM_CAPABILITIES);
+  }
+
+  get gamePath(): string | undefined {
+    return this.realPath || undefined;
   }
 
   async init(): Promise<InitPayload> {
@@ -67,6 +79,10 @@ export class WasmSession extends BaseSession {
       const backend = this.spec.backend(this.ctx.channel.webview, this.ctx.extensionUri, rom.size, romName);
       if (backend.kind === 'gba' || backend.kind === 'nds') {
         backend.battery = await this.ctx.saves.readBattery(this.romId, this.spec.coreId);
+        this.batteryFp = backend.battery ? fingerprintOf(backend.battery) : undefined;
+        this.conflictPath = undefined;
+        this.lastSessionSave = undefined;
+        this.watchSave();
         if (!this.ctx.retainContextWhenHidden) backend.resumeState = await this.ctx.saves.readState(this.romId, this.spec.coreId, 'suspend');
       }
       log.info(`[${this.id}] init ${this.spec.coreId} rom=${redact(rom.realPath)} size=${rom.size} battery=${backend.kind !== 'error' && 'battery' in backend && !!backend.battery}`);
@@ -84,6 +100,70 @@ export class WasmSession extends BaseSession {
     const dir = vscode.Uri.file(path.dirname(this.realPath));
     this.watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(dir, path.basename(this.realPath)));
     this.watcher.onDidChange(() => void this.onRomChanged());
+  }
+
+  private watchSave(): void {
+    if (this.saveWatcher) return;
+    const file = this.ctx.saves.batteryPath(this.romId, this.spec.coreId);
+    this.saveWatcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(vscode.Uri.file(path.dirname(file)), path.basename(file)));
+    const changed = () => void this.onSaveChanged();
+    this.saveWatcher.onDidChange(changed);
+    this.saveWatcher.onDidCreate(changed);
+  }
+
+  /** battery.sav changed on disk. Our own writes match batteryFp and are ignored. */
+  async onSaveChanged(): Promise<void> {
+    await this.persist;
+    if (this.conflictPath || this.savePrompted || !this.romId) return;
+    const fp = await this.ctx.saves.batteryFingerprint(this.romId, this.spec.coreId);
+    if (sameFingerprint(fp, this.batteryFp)) return;
+    log.warn(`[${this.id}] battery save changed outside this session`);
+    // A suspend state made from the old save would bring the old progress back on the next start.
+    await this.ctx.saves.clearState(this.romId, this.spec.coreId, 'suspend');
+    this.savePrompted = true;
+    try {
+      const pick = await vscode.window.showWarningMessage(
+        `RetroVerse: the save for ${this.title} changed on disk. Restart the game with it? If you keep playing, RetroVerse will not overwrite it; your progress goes to a separate file.`,
+        'Restart',
+        'Keep Playing',
+      );
+      if (pick === 'Restart') await this.command('restart');
+    } finally {
+      this.savePrompted = false;
+    }
+  }
+
+  private async onSaveConflict(conflictPath: string): Promise<void> {
+    log.warn(`[${this.id}] battery save changed outside this session; session save kept in ${redact(conflictPath)}`);
+    await this.ctx.saves.clearState(this.romId, this.spec.coreId, 'suspend');
+    if (this.savePrompted) return;
+    this.savePrompted = true;
+    try {
+      const pick = await vscode.window.showWarningMessage(
+        `RetroVerse: the save for ${this.title} changed outside this session, so it was not overwritten. This session's progress was kept in a separate file.`,
+        'Restart with the Newer Save',
+        "Keep This Session's Save",
+        'Reveal',
+      );
+      if (pick === 'Restart with the Newer Save') await this.command('restart');
+      else if (pick === "Keep This Session's Save") await this.keepSessionSave();
+      else if (pick === 'Reveal') void vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(conflictPath));
+    } finally {
+      this.savePrompted = false;
+    }
+  }
+
+  /** Replace battery.sav with this session's data, after backing up the version that replaced it. */
+  async keepSessionSave(): Promise<void> {
+    await this.enqueue(async () => {
+      const data = this.lastSessionSave;
+      if (!data) return;
+      await this.ctx.saves.backupBattery(this.romId, this.spec.coreId, 'external');
+      await this.ctx.saves.writeBattery(this.romId, this.spec.coreId, data);
+      this.batteryFp = fingerprintOf(data);
+      this.conflictPath = undefined;
+      log.info(`[${this.id}] kept this session's save; the other version is in backups/`);
+    });
   }
 
   private async onRomChanged(): Promise<void> {
@@ -145,8 +225,16 @@ export class WasmSession extends BaseSession {
       case 'save.battery':
         if (!this.romId) return;
         await this.enqueue(async () => {
-          await this.ctx.saves.writeBattery(this.romId, this.spec.coreId, msg.payload.data);
-          log.debug(`[${this.id}] battery save ${msg.payload.data.byteLength} bytes`);
+          const data = msg.payload.data;
+          this.lastSessionSave = data;
+          const r = await this.ctx.saves.writeBatteryGuarded(this.romId, this.spec.coreId, data, this.batteryFp, this.conflictPath);
+          if (r.written) {
+            this.batteryFp = r.fp;
+            log.debug(`[${this.id}] battery save ${data.byteLength} bytes`);
+          } else if (!this.conflictPath) {
+            this.conflictPath = r.conflictPath;
+            void this.onSaveConflict(r.conflictPath);
+          }
         });
         break;
       case 'save.state':
@@ -195,6 +283,7 @@ export class WasmSession extends BaseSession {
         return { ok: true };
       case 'restart': {
         await ch.request('flush', undefined, 2000).catch(() => undefined);
+        await this.persist; // the flushed save must be on disk (or in the conflict file) before init re-reads it
         const init = await this.init();
         await ch.post({ v: 1, type: 'init', payload: init });
         return { ok: true };
@@ -212,6 +301,7 @@ export class WasmSession extends BaseSession {
 
   override dispose(): void {
     this.watcher?.dispose();
+    this.saveWatcher?.dispose();
     super.dispose();
   }
 }

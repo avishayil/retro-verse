@@ -95,6 +95,25 @@ owned by another process.
   sanitiser that replaces the game path and the home directory, removes control characters and limits line
   length. The session token is never logged.
 
+- A battery write never replaces a save that changed on disk since the game loaded it. That data goes to a
+  conflict file, and any save that gets replaced later (by the user's choice or by a phone sync) is first copied
+  to `backups/` (newest 20 kept).
+
+## Android sync (adb)
+
+- Sync runs only from an explicit command, and only in a trusted workspace.
+- `retroverse.android.adbPath` and `retroverse.android.device` are machine scoped and ignored in workspace
+  settings. adb is found in the Android SDK, Homebrew or PATH and must pass the same executable checks as Eden
+  (absolute, owned by you or root, not writable by others). It runs without a local shell.
+- `adb shell` joins its arguments into one command line for the phone's shell, so RetroVerse builds those lines
+  only from fixed text plus values that passed validation. Phone paths must sit under `/storage/` or `/sdcard/`,
+  contain no `.` or `..` segments and use only letters, digits, spaces and `._()+&,[]-/`. They are then single
+  quoted. Package names must match the Android package syntax. Saved locations are validated again when read,
+  and paths found on the phone that fail validation are dropped from the picker.
+- Phone saves are copied through a private temporary folder, refused above 16 MiB, and checked for size changes
+  during the copy. A push is verified by reading the file back.
+- Phone paths are logged only as short hashes.
+
 ## Supply chain and releases
 
 - `npm ci --ignore-scripts` installs dependencies in CI, so no package lifecycle script runs. CI also runs

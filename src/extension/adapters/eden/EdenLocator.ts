@@ -1,8 +1,7 @@
 import { existsSync } from 'node:fs';
-import { access, constants } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { validateExecutable } from '../../security/paths';
+import { usableExecutable, validateExecutable } from '../../security/paths';
 import { run } from '../../util/proc';
 
 export interface EdenInstall {
@@ -34,16 +33,6 @@ export function candidatePaths(platform: NodeJS.Platform = process.platform, env
   // Standard install locations first, then PATH; within each group eden-cli before the Qt frontend.
   const byFlavor = (a: string, b: string) => Number(edenFlavor(b) === 'cli') - Number(edenFlavor(a) === 'cli');
   return [...new Set([...extra.sort(byFlavor), ...fromPath.sort(byFlavor)])];
-}
-
-/** A candidate is usable if it exists, is executable and passes the ownership/permission checks. */
-async function usableExecutable(p: string): Promise<string | undefined> {
-  try {
-    await access(p, constants.X_OK);
-    return await validateExecutable(p);
-  } catch {
-    return undefined;
-  }
 }
 
 async function probeVersion(executable: string): Promise<string | undefined> {
